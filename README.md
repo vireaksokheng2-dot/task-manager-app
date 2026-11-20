@@ -56,6 +56,10 @@ Backend: `docker compose run --rm app php artisan test` · `vendor/bin/pint` (fo
 
 Postgres is exposed on `localhost:5433` (`taskmanager` / `taskmanager` / `secret`). Inside Docker the app uses host `db`, port `5432` — see [Gotchas](#gotchas).
 
+## Deploy
+
+Production runs the same code in Docker (Caddy + PHP with automatic HTTPS, scheduler, PostgreSQL). On a fresh DigitalOcean droplet it is one command; see **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+
 ## Testing
 
 | Layer | Tool | Where |

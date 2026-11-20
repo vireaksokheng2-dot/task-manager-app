@@ -1,0 +1,21 @@
+# Keep the production build context small and free of local state / secrets.
+.git
+.github
+node_modules
+vendor
+.env
+.env.*
+!.env.example
+public/hot
+public/build
+bootstrap/cache/*.php
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+tests
+e2e
+e2e/.results
+playwright-report
+test-results
+*.log

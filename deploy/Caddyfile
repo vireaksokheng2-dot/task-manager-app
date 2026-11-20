@@ -1,0 +1,30 @@
+{
+	frankenphp
+	# SITE_ADDRESS=:80            -> plain HTTP (IP address, no domain yet)
+	# SITE_ADDRESS=taskly.example.com -> automatic HTTPS (Let's Encrypt); DNS must already point here
+	admin off
+}
+
+{$SITE_ADDRESS::80} {
+	root * /app/public
+	encode zstd gzip
+
+	# Hashed build assets never change, so browsers can cache them forever.
+	@assets path /build/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	header {
+		-Server
+		# Only meaningful over HTTPS; browsers ignore it on plain HTTP.
+		Strict-Transport-Security "max-age=31536000"
+	}
+
+	# Never serve dotfiles (.env etc.) even if one slipped into public/.
+	@dotfiles {
+		path_regexp (^|/)\.
+		not path /.well-known/*
+	}
+	respond @dotfiles 404
+
+	php_server
+}
