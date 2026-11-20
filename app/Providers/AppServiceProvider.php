@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(config('auth.throttle.auth_per_minute'))
+            ->by($request->ip()));
+
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(config('auth.throttle.api_per_minute'))
+            ->by($request->user()?->id ?: $request->ip()));
+    }
+}

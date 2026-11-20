@@ -1,0 +1,82 @@
+# Everything runs in containers - no local PHP/Node/Postgres required.
+#   docker compose up -d        -> app on http://localhost:8000
+# Host ports: app 8000, vite 5173, postgres 5433 (5432 is often taken locally).
+x-app: &app
+    build: .
+    user: '${HOST_UID:-1000}:${HOST_GID:-1000}'
+    working_dir: /var/www/html
+    volumes:
+        - .:/var/www/html
+    environment: &app-env
+        DB_CONNECTION: pgsql
+        DB_HOST: db
+        DB_PORT: 5432
+        DB_DATABASE: taskmanager
+        DB_USERNAME: taskmanager
+        DB_PASSWORD: secret
+    depends_on:
+        db:
+            condition: service_healthy
+
+services:
+    db:
+        image: postgres:16-alpine
+        environment:
+            POSTGRES_DB: taskmanager
+            POSTGRES_USER: taskmanager
+            POSTGRES_PASSWORD: secret
+        ports:
+            - '5433:5432'
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+            - ./docker/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U taskmanager -d taskmanager']
+            interval: 3s
+            timeout: 3s
+            retries: 20
+
+    app:
+        <<: *app
+        command: sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"
+        ports:
+            - '8000:8000'
+
+    # Runs the every-minute scheduler that fires task reminders.
+    scheduler:
+        <<: *app
+        command: php artisan schedule:work
+
+    # --- isolated end-to-end instance (profile "e2e"; see scripts/e2e.sh) ---------------
+    # Same code, own database (taskmanager_e2e), own port, relaxed rate limits.
+    app-e2e:
+        <<: *app
+        profiles: ['e2e']
+        environment:
+            APP_ENV: e2e
+        entrypoint: ['/var/www/html/docker/e2e-entrypoint.sh']
+        command: php artisan serve --host=0.0.0.0 --port=8001
+        ports:
+            - '8001:8001'
+
+    scheduler-e2e:
+        <<: *app
+        profiles: ['e2e']
+        environment:
+            APP_ENV: e2e
+        command: sh -c "sleep 5 && php artisan schedule:work"
+
+    # Vite dev server with HMR. Start with: docker compose --profile dev up -d
+    vite:
+        image: node:22-alpine
+        profiles: ['dev']
+        user: '${HOST_UID:-1000}:${HOST_GID:-1000}'
+        working_dir: /var/www/html
+        volumes:
+            - .:/var/www/html
+        command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+        ports:
+            - '5173:5173'
+
+volumes:
+    pgdata:

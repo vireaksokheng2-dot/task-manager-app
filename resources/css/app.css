@@ -1,0 +1,259 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+
+@source '../js/**/*.vue';
+
+/* Class-based dark mode so users can pick light / dark / system. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens.
+ *  - ink:    a cool, slightly blue-tinted neutral used for surfaces, borders and text.
+ *  - accent: a calm ultramarine used for the single primary action colour and focus rings.
+ * Every text/background pairing used in the UI has been checked against WCAG 2 AA in both themes
+ * (e2e/a11y.spec.ts re-verifies it with axe on every screen).
+ */
+@theme {
+    --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+    --color-ink-50: #f7f8fa;
+    --color-ink-100: #eef0f4;
+    --color-ink-200: #e1e4ea;
+    --color-ink-300: #c9ced8;
+    --color-ink-400: #98a0ae;
+    --color-ink-500: #6b7383;
+    --color-ink-600: #4f5666;
+    --color-ink-700: #3b4150;
+    --color-ink-800: #262b37;
+    --color-ink-900: #171b24;
+    --color-ink-950: #0d1017;
+
+    --color-accent-50: #eef3ff;
+    --color-accent-100: #dde6ff;
+    --color-accent-200: #c2d2ff;
+    --color-accent-300: #9bb4ff;
+    --color-accent-400: #7a96fc;
+    --color-accent-500: #4a68f0;
+    --color-accent-600: #3249d8;
+    --color-accent-700: #2a3bb4;
+    --color-accent-800: #263490;
+    --color-accent-900: #232f73;
+    --color-accent-950: #161c45;
+
+    --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --animate-rise: rise 0.5s var(--ease-out-soft) backwards;
+    --animate-pop-in: pop-in 0.22s var(--ease-out-soft) backwards;
+    --animate-fade-in: fade-in 0.2s ease-out backwards;
+    --animate-sheet-in: sheet-in 0.28s var(--ease-out-soft) backwards;
+    --animate-check-pop: check-pop 0.4s var(--ease-spring);
+    --animate-ring: ring 0.9s ease-in-out;
+    --animate-badge-pop: badge-pop 0.45s var(--ease-spring);
+    --animate-draw: draw 0.6s 0.15s ease-out both;
+    --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+
+    @keyframes rise {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+    @keyframes pop-in {
+        from {
+            opacity: 0;
+            transform: translateY(-6px) scale(0.97);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    @keyframes sheet-in {
+        from {
+            opacity: 0;
+            transform: translateY(16px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+    @keyframes check-pop {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgb(50 73 216 / 0.45);
+        }
+        40% {
+            transform: scale(1.22);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 9px rgb(50 73 216 / 0);
+        }
+    }
+    @keyframes ring {
+        0%,
+        100% {
+            transform: rotate(0);
+        }
+        15% {
+            transform: rotate(14deg);
+        }
+        30% {
+            transform: rotate(-12deg);
+        }
+        45% {
+            transform: rotate(9deg);
+        }
+        60% {
+            transform: rotate(-6deg);
+        }
+        75% {
+            transform: rotate(3deg);
+        }
+    }
+    @keyframes badge-pop {
+        0% {
+            transform: scale(0.4);
+        }
+        60% {
+            transform: scale(1.25);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    @keyframes draw {
+        from {
+            stroke-dashoffset: 30;
+        }
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    --shadow-card: 0 1px 2px rgb(13 16 23 / 0.04), 0 0 0 1px rgb(13 16 23 / 0.02);
+    --shadow-pop: 0 12px 32px -8px rgb(13 16 23 / 0.22), 0 2px 6px rgb(13 16 23 / 0.06);
+}
+
+html {
+    color-scheme: light;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-text-size-adjust: 100%;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+body {
+    @apply bg-ink-50 text-ink-900 antialiased dark:bg-ink-950 dark:text-ink-100;
+}
+
+::selection {
+    @apply bg-accent-200 text-ink-950;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg px-3.5 text-sm font-medium whitespace-nowrap transition duration-150 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-50 active:not-disabled:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-ink-950;
+    }
+    .btn-primary {
+        @apply bg-accent-600 text-white shadow-sm hover:bg-accent-700 active:bg-accent-800;
+    }
+    .btn-ghost {
+        @apply text-ink-600 hover:bg-ink-200/60 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-800 dark:hover:text-ink-100;
+    }
+    .btn-outline {
+        @apply border border-ink-300 bg-white text-ink-800 shadow-sm hover:bg-ink-50 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:hover:bg-ink-800;
+    }
+    .btn-danger {
+        @apply text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40;
+    }
+    .btn-sm {
+        @apply h-7 gap-1.5 rounded-md px-2.5 text-xs;
+    }
+    .field {
+        @apply block h-9 w-full rounded-lg border border-ink-300 bg-white px-3 text-sm text-ink-900 shadow-sm transition-colors placeholder:text-ink-500 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/25 focus:outline-none dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:placeholder:text-ink-400;
+    }
+    textarea.field {
+        @apply h-auto py-2;
+    }
+    .label {
+        @apply mb-1.5 block text-xs font-medium text-ink-600 dark:text-ink-400;
+    }
+    .card {
+        @apply rounded-xl border border-ink-200 bg-white shadow-card dark:border-ink-800 dark:bg-ink-900;
+    }
+    .popover {
+        @apply rounded-xl border border-ink-200 bg-white shadow-pop dark:border-ink-700 dark:bg-ink-900;
+    }
+    .eyebrow {
+        @apply text-xs font-medium tracking-wide text-ink-600 uppercase dark:text-ink-400;
+    }
+    /* Staggered entrance: <div class="rise" style="--d: 80ms">. */
+    .rise {
+        animation: var(--animate-rise);
+        animation-delay: var(--d, 0ms);
+    }
+    .skeleton {
+        background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
+        background-size: 200% 100%;
+        animation: var(--animate-shimmer);
+    }
+    .dark .skeleton {
+        background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.06) 50%, transparent 70%);
+    }
+    .kbd {
+        @apply inline-flex h-5 min-w-5 items-center justify-center rounded border border-ink-300 bg-ink-50 px-1 font-sans text-[11px] font-medium text-ink-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-300;
+    }
+
+    /* Round completion checkbox. Still a real <input type="checkbox">, so it is fully accessible. */
+    .check {
+        @apply m-0 grid size-[18px] shrink-0 cursor-pointer appearance-none place-content-center rounded-full border-[1.5px] border-ink-500 bg-transparent transition-colors hover:border-accent-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-ink-400 dark:hover:border-accent-400 dark:focus-visible:ring-offset-ink-900;
+    }
+    .check:checked {
+        @apply border-accent-600 bg-accent-600 dark:border-accent-500 dark:bg-accent-500;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+        background-size: 70%;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    .check-pop {
+        animation: var(--animate-check-pop);
+    }
+    .check-sq {
+        @apply size-4 rounded-[5px];
+    }
+}
